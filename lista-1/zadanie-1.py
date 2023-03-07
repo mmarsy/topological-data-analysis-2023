@@ -32,9 +32,14 @@ class Circle:
     def __repr__(self):
         return self.d.__repr__()
 
+    def __getitem__(self, item):
+        return self.d[item]
+
 
 def main():
-    print(Circle())
+    circles = [Circle(r=1, n=n) for n in range(3, 10)]
+    results = [circ['x'].var() for circ in circles]
+    print(results)
 
 
 if __name__ == '__main__':
