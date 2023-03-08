@@ -6,9 +6,9 @@ import math as m
 def sphere_gen(r=1, n=6):
     for i in range(n):
         for j in range(n):
-            yield {'x': r * m.cos(m.pi * i / n),
-                   'y': r * m.sin(m.pi * i / n) * m.cos(m.pi * j / n),
-                   'z': r * m.sin(m.pi * i / n) * m.sin(m.pi * j / n)}
+            yield {'x': r * m.cos(2 * m.pi * i / n),
+                   'y': r * m.sin(2 * m.pi * i / n) * m.cos(2 * m.pi * j / n),
+                   'z': r * m.sin(2 * m.pi * i / n) * m.sin(2 * m.pi * j / n)}
 
 
 def main():
@@ -19,9 +19,12 @@ def main():
     y = [d['y'] for d in sphere_gen()]
     z = [d['z'] for d in sphere_gen()]
 
-    ax = plt.figure().add_subplot(projection='3d')
-    ax.scatter(x, y, z)
-    plt.show()
+#    ax = plt.figure().add_subplot(projection='3d')
+#    ax.scatter(x, y, z)
+#    plt.show()
+
+    df = pd.DataFrame([d for d in sphere_gen(1, 10)])
+    print(df)
 
 
 if __name__ == '__main__':
