@@ -15,16 +15,17 @@ def main():
     for d in sphere_gen():
         print(d['x'] ** 2 + d['y'] ** 2 + d['z'] ** 2)
 
-    x = [d['x'] for d in sphere_gen()]
-    y = [d['y'] for d in sphere_gen()]
-    z = [d['z'] for d in sphere_gen()]
-
 #    ax = plt.figure().add_subplot(projection='3d')
 #    ax.scatter(x, y, z)
 #    plt.show()
 
-    df = pd.DataFrame([d for d in sphere_gen(1, 10)])
+    df = pd.DataFrame([d for d in sphere_gen(1, 4)])
+    df.append(pd.DataFrame([d for d in sphere_gen(3, 4)]))
     print(df)
+
+    df_t = pd.DataFrame([{1: 1}])
+    df_t.append([{1: 2}])
+    print(df_t)
 
 
 if __name__ == '__main__':
