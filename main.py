@@ -31,10 +31,23 @@ def ker(matrix):
     return dim_of_domain - rank(matrix)
 
 
+def no_square(n):
+    result = set()
+    for i in range(1, n + 1):
+        good = True
+        for k in range(2, i + 1):
+            if i % (k ** 2) == 0:
+                good = False
+        if good:
+            result.add(i)
+    return result
+
+
 class SimplicialComplex(list):
     def __init__(self, n):
         super().__init__()
-        self.vertices = set(range(1, n+1))
+        # self.vertices = set(range(1, n+1))
+        self.vertices = no_square(n)
         self.append([])
         self.enumerations = []
 
@@ -88,44 +101,28 @@ class SimplicialComplex(list):
         print(f'dim ker del_{n} = {ker(k)}, dim im del_{n + 1} = {rank(i)}')
         return ker(k) - rank(i)
 
+    def euler_characteristic(self):
+        result = 0
+        for dim in self.underlying_spaces:
+            if dim >= 0:
+                result += ((-1) ** dim) * len(self.underlying_spaces[dim])
+        return result
 
-class SimplicialComplex2(list):
-    def __init__(self, n):
-        super().__init__()
-        self.vertices = set(range(1, n+1))
-        self.append([])
-
-        def check_if_finished():
-            for lst in self:
-                for i in self.vertices:
-                    if lst:
-                        if i % lst[-1] == 0 and i > lst[-1]:
-                            if lst + [i] not in self:
-                                self.append(lst + [i])
-                                return check_if_finished()
-                    else:
-                        if [i] not in self:
-                            self.append([i])
-                            return check_if_finished()
-
-        check_if_finished()
-        self.remove([])
-    
 
 def main():
-    n = 50
+    n = 100
     t = time.time()
     a = SimplicialComplex(n)
     # print(time.time() - t)
     # print(a)
     for key in a.underlying_spaces:
-        print(f'{key}: {a.underlying_spaces[key]}')
+        if len(a.underlying_spaces[key]) > 0:
+            print(f'{key}: ({len(a.underlying_spaces[key])}), {a.underlying_spaces[key]}')
+    print(a.euler_characteristic())
 
-    for i in range(n-1):
-        try:
-            print(a.homology_group(i))
-        except KeyError:
-            pass
+
+def test():
+    print(no_square(10))
 
 
 if __name__ == '__main__':
