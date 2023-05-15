@@ -97,11 +97,16 @@ class FieldMatrix(Matrix):
         self.to_eliminate = [[_init(x) for x in col] for col in lst]
 
 
-m = FieldMatrix([[0, 1, -1, 2, 2],
-                [0, 2, -2, 1, 0],
-                [0, -1, 2, 1, -2],
-                [0, 2, -1, 122, 0]], 7)
-m.gauss_elimination()
-m.gauss_elimination()
-print(m.to_eliminate)
-print(m.rank())
+def test():
+    m = FieldMatrix([[0, 1, -1, 2, 2],
+                    [0, 2, -2, 1, 0],
+                    [0, -1, 2, 1, -2],
+                    [0, 2, -1, 122, 0]], 7)
+    m.gauss_elimination()
+    m.gauss_elimination()
+    print(m.to_eliminate)
+    print(m.rank())
+
+
+if __name__ == '__main__':
+    test()

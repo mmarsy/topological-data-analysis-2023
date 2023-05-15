@@ -2,6 +2,9 @@ import random
 import time
 import numpy as np
 
+from field import FSFElement
+from matrix import FieldMatrix
+
 
 def get_key(d, val):
     for key, value in d.items():
@@ -21,9 +24,9 @@ def matrix_dic_to_table(d):
     return result
 
 
-def rank(matrix):
-    matrix1 = np.array(matrix)
-    return np.linalg.matrix_rank(matrix1)
+def rank(matrix, char=None):
+    matrix1 = FieldMatrix(matrix, char)
+    return matrix1.rank()
 
 
 def ker(matrix):
