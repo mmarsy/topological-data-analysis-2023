@@ -3,7 +3,11 @@ import time
 import numpy as np
 
 from field import FSFElement
-from matrix import FieldMatrix
+from matrix import FieldMatrix, Matrix
+
+
+def transpose(table):
+    return [[table[x][y] for x in range(len(table))] for y in range(len(table[0]))]
 
 
 def get_key(d, val):
@@ -21,36 +25,34 @@ def matrix_dic_to_table(d):
         temp_order.sort()
         temp = [d[key][i] for i in temp_order]
         result.append(temp)
-    return result
+    return transpose(result)
 
 
-def rank(matrix, char=None):
+def dim_im(matrix, char=None):
     matrix1 = FieldMatrix(matrix, char)
-    return matrix1.rank()
+    return matrix1.dim_im()
 
 
-def ker(matrix):
+def dim_ker(matrix):
     dim_of_domain = len(matrix)
-    return dim_of_domain - rank(matrix)
+    return dim_of_domain - dim_im(matrix)
 
 
 def no_square(n):
-    result = set()
     for i in range(1, n + 1):
         good = True
         for k in range(2, i + 1):
             if i % (k ** 2) == 0:
                 good = False
         if good:
-            result.add(i)
-    return result
+            yield i
 
 
 class SimplicialComplex(list):
     def __init__(self, n):
         super().__init__()
         # self.vertices = set(range(1, n+1))
-        self.vertices = no_square(n)
+        self.vertices = set(range(1, n))
         self.append([])
         self.enumerations = []
 
@@ -77,9 +79,14 @@ class SimplicialComplex(list):
             if check_if_finished():
                 self.remove([])
                 break
-        self.underlying_spaces = {n - 1: {index: val for index, val in enumerate([lst for lst in self if len(lst) == n])}
-                                  for n in self.vertices}
-        self.underlying_spaces[-1] = {0: []}
+        self.underlying_spaces = {-1: {0: []}}
+        for i in range(1, n):
+            self.underlying_spaces[i - 1] = {index: val for index, val in enumerate(self) if len(val) == i}
+            if len(self.underlying_spaces[i - 1]) == 0:
+                self.underlying_spaces[i - 1] = {0: []}
+                self.end = i - 1
+                break
+            # print(f'{i}: {self.underlying_spaces[i-1]}')
 
     def del_matrix(self, n):
         result = {}
@@ -99,33 +106,37 @@ class SimplicialComplex(list):
         return result
 
     def homology_group(self, n):
+        if n == -1 or n == self.end:
+            return 0
         k = matrix_dic_to_table(self.del_matrix(n))
         i = matrix_dic_to_table(self.del_matrix(n + 1))
-        print(f'dim ker del_{n} = {ker(k)}, dim im del_{n + 1} = {rank(i)}')
-        return ker(k) - rank(i)
+        print(f'len(del_{n + 1}) = {len(i)}, len(del_{n + 1}[0]) = {len(i[0])}')
+        print(f'dim ker del_{n} = {dim_ker(k)}, dim im del_{n + 1} = {dim_im(i)}')
+        print(Matrix(k) * Matrix(i))
+        return dim_ker(k) - dim_im(i)
 
     def euler_characteristic(self):
         result = 0
         for dim in self.underlying_spaces:
-            if dim >= 0:
+            if self.end > dim >= 0:
                 result += ((-1) ** dim) * len(self.underlying_spaces[dim])
         return result
 
 
 def main():
-    n = 100
-    t = time.time()
+    n = 10
     a = SimplicialComplex(n)
-    # print(time.time() - t)
-    # print(a)
+    for i in a:
+        print(i)
     for key in a.underlying_spaces:
+        a.homology_group(key)
         if len(a.underlying_spaces[key]) > 0:
-            print(f'{key}: ({len(a.underlying_spaces[key])}), {a.underlying_spaces[key]}')
+            print(f'{key}: ({len(a.underlying_spaces[key])})')
     print(a.euler_characteristic())
 
 
 def test():
-    print(no_square(10))
+    print(transpose([[1, 2], [3, 4]]))
 
 
 if __name__ == '__main__':

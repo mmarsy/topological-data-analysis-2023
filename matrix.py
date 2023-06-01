@@ -25,12 +25,21 @@ def is_zero_list(lst):
     return all([is_zero(x) for x in lst])
 
 
+def transpose(table):
+    return [[table[x][y] for x in range(len(table))] for y in range(len(table[0]))]
+
+
 class Matrix(list):
     def __init__(self, lst):
         super().__init__()
         for col in lst:
             self.append(col)
         self.to_eliminate = lst
+
+    def __mul__(self, other):
+        temp = transpose(other)
+        result = [[sum([x * y for x, y in zip(self[i], temp[j])]) for j in range(len(temp))] for i in range(len(self))]
+        return Matrix(result)
 
     def gauss_elimination(self, to_print=False):
         step = 0
@@ -40,18 +49,21 @@ class Matrix(list):
         ready = False
 
         while not ready:
-            for i in range(step, len(working_matrix)):
+            try:
+                for i in range(step, len(working_matrix)):
+                    if not is_zero(working_matrix[step][step + appendix]):
+                        ready = True
+                        break
+                    working_matrix = working_matrix[:step] + working_matrix[step + 1:] + [working_matrix[step]]
                 if not is_zero(working_matrix[step][step + appendix]):
                     ready = True
-                    break
-                working_matrix = working_matrix[:step] + working_matrix[step + 1:] + [working_matrix[step]]
-            if not is_zero(working_matrix[step][step + appendix]):
-                ready = True
-            else:
-                appendix += 1
+                else:
+                    appendix += 1
+            except IndexError:
+                return 0
 
         while step < dim:
-            # we want rank, so this operation does not matter
+            # we want dim_im, so this operation does not matter
             working_matrix[step] = mul_list(working_matrix[step], inverse(working_matrix[step][step + appendix]))
             pivot = working_matrix[step]
 
@@ -76,11 +88,13 @@ class Matrix(list):
                         break
 
         self.to_eliminate = working_matrix
-        return appendix
 
-    def rank(self):
+    def dim_im(self):
         self.gauss_elimination()
         return len([lst for lst in self.to_eliminate if not is_zero_list(lst)])
+
+    def dim_ker(self):
+        self.gauss_elimination()
 
 
 class FieldMatrix(Matrix):
@@ -98,14 +112,9 @@ class FieldMatrix(Matrix):
 
 
 def test():
-    m = FieldMatrix([[0, 1, -1, 2, 2],
-                    [0, 2, -2, 1, 0],
-                    [0, -1, 2, 1, -2],
-                    [0, 2, -1, 122, 0]], 7)
-    m.gauss_elimination()
-    m.gauss_elimination()
-    print(m.to_eliminate)
-    print(m.rank())
+    m = Matrix([[1, 1, 1], [0, 1, 0]])
+    a = Matrix([[1, 9], [3, 0], [9, 10]])
+    print(m * a)
 
 
 if __name__ == '__main__':
