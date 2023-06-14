@@ -38,8 +38,8 @@ def dim_ker(matrix):
     return dim_of_domain - dim_im(matrix)
 
 
-def no_square(n):
-    for i in range(1, n + 1):
+def square_free(n):
+    for i in range(2, n + 1):
         good = True
         for k in range(2, i + 1):
             if i % (k ** 2) == 0:
@@ -48,14 +48,35 @@ def no_square(n):
             yield i
 
 
+def prime(n):
+    for i in range(2, n + 1):
+        good = True
+        for k in range(2, i):
+            if i % k == 0:
+                good = False
+        if good:
+            yield i
+
+
+class PrimeFactorization(list):
+    def __init__(self, n):
+        #  we want n to be square free
+        super().__init__()
+        for i in prime(n):
+            if n % i == 0:
+                self.append(i)
+        self.val = np.prod(self)
+
+
 class SimplicialComplex(list):
     def __init__(self, n):
         super().__init__()
-        # self.vertices = set(range(1, n+1))
-        self.vertices = set(range(1, n))
-        self.append([])
+        self.vertices = set(prime(n))
         self.enumerations = []
+        for i in square_free(n):
+            self.append(PrimeFactorization(i))
 
+        '''
         def check_if_finished():
             for i in self.vertices:
                 for lst in self:
@@ -79,6 +100,8 @@ class SimplicialComplex(list):
             if check_if_finished():
                 self.remove([])
                 break
+        '''
+
         self.underlying_spaces = {-1: {0: []}}
         for i in range(1, n):
             self.underlying_spaces[i - 1] = {index: val for index, val in enumerate(self) if len(val) == i}
@@ -124,19 +147,9 @@ class SimplicialComplex(list):
 
 
 def main():
-    n = 10
-    a = SimplicialComplex(n)
-    for i in a:
-        print(i)
-    for key in a.underlying_spaces:
-        a.homology_group(key)
-        if len(a.underlying_spaces[key]) > 0:
-            print(f'{key}: ({len(a.underlying_spaces[key])})')
+    n = 1000
+    a = SimplicialComplex(30)
     print(a.euler_characteristic())
-
-
-def test():
-    print(transpose([[1, 2], [3, 4]]))
 
 
 if __name__ == '__main__':
