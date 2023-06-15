@@ -1,8 +1,7 @@
-import random
-import time
+import os
 import numpy as np
 
-from field import FSFElement
+
 from matrix import FieldMatrix, Matrix
 
 
@@ -58,6 +57,25 @@ def prime(n):
             yield i
 
 
+def primes_to_file(n=1000):
+    if os.path.isfile('prime_numbers.txt'):
+        return
+
+    with open('prime_numbers.txt', 'w') as file:
+        for i in prime(n):
+            file.write(str(i) + '\n')
+
+
+if not os.path.isfile('prime_numbers.txt'):
+    primes_to_file(10000)
+
+with open('prime_numbers.txt', 'r') as prime_numbers_list:
+    primes = []
+    for line in prime_numbers_list:
+        temp = int(line)
+        primes.append(temp)
+
+
 class PrimeFactorization(list):
     def __init__(self, n):
         #  we want n to be square free
@@ -71,36 +89,10 @@ class PrimeFactorization(list):
 class SimplicialComplex(list):
     def __init__(self, n):
         super().__init__()
-        self.vertices = set(prime(n))
+        self.vertices = set([i for i in primes if i <= n])
         self.enumerations = []
         for i in square_free(n):
             self.append(PrimeFactorization(i))
-
-        '''
-        def check_if_finished():
-            for i in self.vertices:
-                for lst in self:
-                    if lst:
-                        if i % lst[-1] == 0 and i > lst[-1]:
-                            if lst + [i] not in self:
-                                self.append(lst + [i])
-                                return False
-            return True
-
-        while True:
-            extended = random.choice(self)
-            for number in self.vertices:
-                if not extended:
-                    if [number] not in self:
-                        self.append([number])
-                else:
-                    if number % extended[-1] == 0 and number > extended[-1]:
-                        if extended + [number] not in self:
-                            self.append(extended + [number])
-            if check_if_finished():
-                self.remove([])
-                break
-        '''
 
         self.underlying_spaces = {-1: {0: []}}
         for i in range(1, n):
@@ -109,7 +101,6 @@ class SimplicialComplex(list):
                 self.underlying_spaces[i - 1] = {0: []}
                 self.end = i - 1
                 break
-            # print(f'{i}: {self.underlying_spaces[i-1]}')
 
     def del_matrix(self, n):
         result = {}
@@ -128,14 +119,15 @@ class SimplicialComplex(list):
             result[face] = temp
         return result
 
-    def homology_group(self, n):
+    def homology_group(self, n, to_print=False):
         if n == -1 or n == self.end:
             return 0
         k = matrix_dic_to_table(self.del_matrix(n))
         i = matrix_dic_to_table(self.del_matrix(n + 1))
-        print(f'len(del_{n + 1}) = {len(i)}, len(del_{n + 1}[0]) = {len(i[0])}')
-        print(f'dim ker del_{n} = {dim_ker(k)}, dim im del_{n + 1} = {dim_im(i)}')
-        print(Matrix(k) * Matrix(i))
+        if to_print:
+            print(f'len(del_{n + 1}) = {len(i)}, len(del_{n + 1}[0]) = {len(i[0])}')
+            print(f'dim ker del_{n} = {dim_ker(k)}, dim im del_{n + 1} = {dim_im(i)}')
+            # print(Matrix(k) * Matrix(i))
         return dim_ker(k) - dim_im(i)
 
     def euler_characteristic(self):
@@ -147,8 +139,9 @@ class SimplicialComplex(list):
 
 
 def main():
-    n = 1000
-    a = SimplicialComplex(30)
+    n = 30
+    a = SimplicialComplex(n)
+    print(a.vertices)
     print(a.euler_characteristic())
 
 
